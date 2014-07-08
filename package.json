@@ -1,0 +1,23 @@
+{
+  "name": "waif",
+  "version": "0.0.1",
+  "description": "a micro-microservices library",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wayfin/waif.git"
+  },
+  "keywords": [
+    "rest",
+    "microservices"
+  ],
+  "author": "Adrian Rossouw (adrian@wayfinder.co)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wayfin/waif/issues"
+  },
+  "homepage": "https://github.com/wayfin/waif"
+}
