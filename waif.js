@@ -1,8 +1,7 @@
 var request = require('request');
 var norma = require('norma');
 var _ = require('lodash');
-
-
+var Service = require('./service');
 /**
 * Waif constructor.
 *
@@ -15,6 +14,35 @@ function Waif(opts) {
   return this;
 }
 
+Waif.prototype.service = _service;
+Waif.prototype.args = _args;
+Waif.prototype.request = _request;
+
+function _service() {
+  var args = this.args('service', arguments);
+  var name = args[0];
+  if (!this._services[name]) {
+    this._services[name] = new Service();
+  }
+  return this._services[name];
+}
+
+/**
+* Map needed arguments using norma
+*/
+
+function _args(key, args) {
+  var needs = {
+    service: norma.compile('s'),
+    request:  norma.compile('s?', 's|o?, f?'),
+    config: norma.compile('s|o?, s|o?, f?')
+  };
+
+  var _default = [];
+  return (needs[key]||_default)(args);
+}
+
+
 /**
 *  Execute an HTTP request against a mounted microservice.
 *
@@ -22,34 +50,9 @@ function Waif(opts) {
 *  which has been prepopulated with the right credentials
 *  when when used.
 */
-Waif.prototype.request = _request;
 
 function _request() {
-  var args = this.requestNeeds(arguments);
-
-  console.log(args);
 }
-
-Waif.prototype.requestNeeds = norma.compile('s, s|o?, f?');
-
-
-/**
-*  Mount a microservice onto Waif.
-*
-*  Each microservice is an connect-like http server,
-*  that will get mounted on whichever path you specify.
-*
-*  @see tests/mount.js for examples
-*/
-
-Waif.prototype.mount = _mount;
-
-function _mount() {
-  var args = this.mountNeeds(arguments);
-  console.log(args);
-}
-
-Waif.prototype.mountNeeds = norma.compile('s, s|i|o, o?, o?');
 
 
 

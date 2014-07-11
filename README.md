@@ -20,17 +20,24 @@ Examples
     var waif = require('waif')
 
     // register the event service as being hosted on an external server
-    waif.mount('event', 'http://events.example.com');
-
+    waif.service('event')
+        .remote('http://events.example.com');
+    
     // register a service only used internally as being hosted on a unix socket.
     // this means it will not be exposed publicly, and you can still break it out later.
-    waif.mount('fetch-results', require('fetch-results/src/app'));
+    waif.service('fetch-results')
+        .mount(require('fetch-results/src/app'));
 
     // register this service as being exposed on port 3000
-    waif.mount('app', 3000, require('src/app'));
+    waif.service('app')
+        .listen(3000)
+        .mount(require('src/app'));
 
     // you can now make requests to any of these services using request.
     // This is a simple wrapper of Mikael's request module.
     waif.request('fetch-results', '/path/goes/here').then(callback);
+    waif.service('fetch-results')
+        .request('/path/goes/here').then(callback);
+
 
 
