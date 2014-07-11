@@ -9,23 +9,23 @@ describe('Mount', function() {
     var serviceUrl = 'http://service.example.com/'; 
 
     it('can be mounted as a url string', function() {
-      waif.service('serviceName').remote(serviceUrl);
+      waif('serviceName').remote(serviceUrl);
     });
 
     it('can be mounted as a parsed url object', function() {
-      waif.service('serviceName').remote(url.parse(serviceUrl));
+      waif('serviceName').remote(url.parse(serviceUrl));
     });
   });
 
   describe('local services', function() {
 
     it('should create a random socket', function() {
-      waif.service('serviceName').mount(service);
+      waif('serviceName').mount(service);
     });
 
     it('should allow you to specify a socket', function() {
       var filename = '/tmp/sockets/service-name';
-      waif.service('serviceName')
+      waif('serviceName')
           .local(filename)
           .mount(service);
     });
@@ -35,11 +35,11 @@ describe('Mount', function() {
   describe('listen services', function() {
     var service = express();
 
-    waif.service('listenTest')
+    waif('listenTest')
         .listen(3000)
         .mount(service);
 
-    waif.service('listenTest')
+    waif('listenTest')
         .listen('/path')
         .mount(service);
   });

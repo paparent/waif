@@ -10,7 +10,7 @@ describe('request service', function() {
   });
 
   it('request closure', function(doneFn) {
-    waif.request('serviceName')('/path/here', doneFn);
+    waif('serviceName').request('/path/here', doneFn);
   });
 
   it('request via .appl', function(doneFn) {
@@ -20,7 +20,7 @@ describe('request service', function() {
 
   it('pipe a file from a file hosting service', function(doneFn) {
     /*var response = fs.createWriteStream('test');
-    waif.request('file-service')
+    waif('file-service').request
       .get('/filename.jpg')
       .pipe(response);*/
   });

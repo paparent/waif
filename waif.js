@@ -2,6 +2,7 @@ var request = require('request');
 var norma = require('norma');
 var _ = require('lodash');
 var Service = require('./service');
+
 /**
 * Waif constructor.
 *
@@ -10,14 +11,15 @@ var Service = require('./service');
 * system.
 */
 function Waif(opts) {
-  this.services = {};
-  return this;
+  this._services = {};
+  return this.service.bind(this);
 }
 
 Waif.prototype.service = _service;
 Waif.prototype.args = _args;
 Waif.prototype.request = _request;
 
+// retrieve or set a service
 function _service() {
   var args = this.args('service', arguments);
   var name = args[0];
@@ -27,10 +29,7 @@ function _service() {
   return this._services[name];
 }
 
-/**
-* Map needed arguments using norma
-*/
-
+// Map needed arguments using norma
 function _args(key, args) {
   var needs = {
     service: norma.compile('s'),
@@ -42,7 +41,6 @@ function _args(key, args) {
   return (needs[key]||_default)(args);
 }
 
-
 /**
 *  Execute an HTTP request against a mounted microservice.
 *
@@ -50,10 +48,13 @@ function _args(key, args) {
 *  which has been prepopulated with the right credentials
 *  when when used.
 */
-
 function _request() {
+  // if not on service, and service arg
+  //    make this a service request.
+  // pass rest of args so service.request
+  // if path
+  //    makea request using service.request
 }
-
 
 
 module.exports = Waif;
