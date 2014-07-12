@@ -7,7 +7,8 @@ Waif provides the smallest possible abstraction that would allow you to
 to write an express-based microservice that can be used as a local library  
 or a remote instance.  
 
-__Waif is developed by [Wayfinder](http://wayfinder.co) and is being used in production where we deploy our services using [Longshoreman](http://longshoreman.io)__
+__Waif is developed by [Wayfinder](http://wayfinder.co) and is (almost) being  
+used in production where we deploy our services using [Longshoreman](http://longshoreman.io).__
 
 ### How it works
 
@@ -82,8 +83,7 @@ This is a problem for the form of automated deployment you are using.
 Since running many services comes with an increase in deployment issues,  
 you will need to figure out what works for service discovery for you.  
 
-May I suggest [Longshoreman](http://longshoreman.io)  
-
+May I suggest [Longshoreman](http://longshoreman.io)?   
 
 ### Example Service Definition File
 
