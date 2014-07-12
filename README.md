@@ -91,7 +91,7 @@ May I suggest [Longshoreman](http://longshoreman.io)
 ```javascript
 // filename: service.js
 
-// Return a new instance of Waid.
+// Return a new instance of Waif.
 var waif = require('waif')();
 
 // Configuration.
@@ -131,7 +131,8 @@ waif('example')                             // the example service itself.
   .use(require('./src/example'))            // mount the service' own app.
   .listen(PORT);                            // listen on a specific port.
 
-// Actually start up the servers.
+// Start up the servers.
+// Has a companion stop method which closes them all.
 waif.start();
 ```
 
@@ -140,32 +141,35 @@ waif.start();
 ```javascript
 // filename: src/example.js
 
-// just your normal express app
-var app = require('express')();
-
-// get the waif instance
+// Get the waif instance.
 var waif = require('waif')();
 
-// Services are a very simple wrapper for request.
-// the REST is all up to you.
+// Normal Express app.
+var app = require('express')();
+
+// Services are simple request wrappers.
 var store = waif('store');
-app.get('/post/:id', function(req, res, next) {
-  store('/posts/' + req.param.id, showBody('post');
-});
-
-// using the custom data service is just the same.
 var postList = waif('postList');
-app.get('/', function(req, res, next) {
-  dataList('/', showBody('list') );
+
+// The REST is all up to you.
+app.get('/post/:id', function(req, res, next) {
+  store('/posts/' + req.param.id, _showBody('post');
 });
 
-// small helper to make it clearer
-function showBody(template) {
+app.get('/', function(req, res, next) {
+  dataList('/', _showBody('list'));
+});
+
+// export app instead of listening on a porn
+module.exports = app;
+
+//// HELPERS
+
+function _showBody(template) {
   return function(err, data) {
     if (err) { return next(err); }
     res.render('post', { body: data.body });
   };
 }
 
-module.exports = app;
 ```
