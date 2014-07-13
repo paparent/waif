@@ -19,7 +19,6 @@ Service.prototype.request = _request;
 Service.prototype.listen = _listen;
 Service.prototype.forward = _forward;
 Service.prototype.config = _config;
-Service.prototype.listen = _listen;
 Service.prototype.use = _use;
 
 function _args(key, args) {
