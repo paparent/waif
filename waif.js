@@ -16,16 +16,31 @@ function Waif(opts) {
 }
 
 Waif.prototype.service = _service;
-Waif.prototype.args = _args;
-Waif.prototype.request = _request;
+
+Waif._instance = null;
+Waif.getInstance = _getInstance;
+
+module.exports = Waif._getInstance();
+
+
+
+function _getInstance() {
+  if(this.instance === null){
+    this._instance = new Waif();
+  }
+  return this._instance;
+}
+
 
 // retrieve or set a service
 function _service() {
-  var args = this.args('service', arguments);
+  var args = _args('service', arguments);
   var name = args[0];
+
   if (!this._services[name]) {
     this._services[name] = new Service();
   }
+
   return this._services[name];
 }
 
@@ -40,21 +55,3 @@ function _args(key, args) {
   var _default = [];
   return (needs[key]||_default)(args);
 }
-
-/**
-*  Execute an HTTP request against a mounted microservice.
-*
-*  Get request object for any service that has been mounted,
-*  which has been prepopulated with the right credentials
-*  when when used.
-*/
-function _request() {
-  // if not on service, and service arg
-  //    make this a service request.
-  // pass rest of args so service.request
-  // if path
-  //    makea request using service.request
-}
-
-
-module.exports = Waif;
