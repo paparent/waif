@@ -1,4 +1,5 @@
 var request = require('request');
+var assert = require('assert');
 var norma = require('norma');
 var _ = require('lodash');
 
@@ -7,56 +8,71 @@ var _ = require('lodash');
 * Service constructor.
 *
 * Instances will contain a map to all of the
-* services that have been useed onto the
+* services that have been mounted onto the
 * system.
 */
-function Service(opts) {
+function Service() {
+  this.options    = {};
+  this.middleware = [];
+  this.type       = null;
+  this.listenOn   = null;
+  this.forwardTo  = null;
+  this.running    = false;
   return this;
 }
 
-Service.prototype.args = _args;
-Service.prototype.request = _request;
-Service.prototype.listen = _listen;
-Service.prototype.forward = _forward;
-Service.prototype.config = _config;
-Service.prototype.use = _use;
+Service.createInstance = function() {
+  var _service = new Service();
 
-function _args(key, args) {
-  var needs = {};
+  // called directly
+  var fn = function() {
+    _request.apply(_service, arguments);
+  };
 
-  return (needs[key]||_default)(args);
-  function _default() { return arguments[0]; }
-}
+  fn.request = _request.bind(_service);
+  fn.forward = _forward.bind(_service);
+  fn.listen  = _listen.bind(_service);
+  fn.config  = _config.bind(_service);
+  fn.use     = _use.bind(_service);
+  fn.start   = _start.bind(_service);
+  fn.stop    = _stop.bind(_service);
+  return fn;
+};
 
-// Mounts a service and uses on a socket or port.
-function _use() {
-  // use app.use to ue an express app as midleware
-}
+module.exports = Service.createInstance;
+
 
 // make a request against a service
 function _request() {
-  // wrap the request module
-  // preload the path / host url / listenhost:port
-  // append the path (if provided)
-  // call the function (if given a path)
-  // pass the callback (if provided)
+}
+
+// mount services or paths
+function _use() {
+  var args = norma('path:s? middleware:o');
+  var options = args.options();
+  this.middleware.push(options);
 }
 
 // Mount a service on a unix domain socket.
-function _listen() {
-  // check for file in args
-  // if file, open socket there
-  // else create random file
-  // open socket there or fail
+function _listen(listenOn) {
+  assert(this.type, 'service:'+this.name+' couldn\'t listen.');
+
+  this.listenOn = listenOn;
 }
 
 // Mount a service on a http server.
-function _forward() {
-  // add server to service
+function _forward(forwardTo) {
+  assert(this.type, 'service:'+this.name+' couldn\'t forward.');
+
+  this.forwardTo = forwardTo;
 }
 
-// Configure a service.
 function _config() { }
 
+// builds an express app if needed
+function _start() { }
 
-module.exports = Service;
+// stops listening on ports/sockets
+function _stop() {}
+
+
