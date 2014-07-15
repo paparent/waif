@@ -160,7 +160,7 @@ app.get('/', function(req, res, next) {
   dataList('/', _showBody('list'));
 });
 
-// export app instead of listening on a porn
+// export app instead of listening on a port
 module.exports = app;
 
 //// HELPERS
