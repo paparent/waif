@@ -58,6 +58,8 @@ to provide to make a request against this service.
 
 #### Using a service
 
+[Example service](/example/src/example.js)
+
 In the services themselves, instead of having to use 
 use the credentials directly, you just use
 the service name.
@@ -165,7 +167,7 @@ file containing a map of other services (although unlikely).
 
 #### Consistent service names mean you can swap out implementations.
 
-There may be multiple implementation for common service types.  
+There may be multiple implementations for common service types.  
 
 Store services are the one that come to mind here. By using a 'store' service  
 to interact with our database, we gain the ability to swap out the mongodb  
