@@ -24,28 +24,29 @@ environments.
 
 #### Declaring a service
 
+[Service Declaration Example](/example/service.js)
+
 You always declare the services in a separate file from
 where your implementation lists.
 
 When you declare a service you:
 
 1. Assign it a name (ie: 'event')
-1. Provide the address to reach it. (remotely or locally)
+1. Provide the address to reach it. (remote or local)
 1. Start a web server to host it. (optional, if local)
 1. Providing configuration for it. (optional, service-specific)
 
+If your service is remote :
+
 ```javascript
-
-// If your service is remote:
-// -------------------------
-
-// The URL to forward requests to this service to.
+// The URL to _forward_ requests to this service to.
 waif('event').forward('http://event.example.com');`
+```
 
-// If you are hosting the service:
-// -------------------------------
+If you are hosting the service :
 
-// The middleware to use to respond to this route
+```javascript
+// The middleware to _use_ to respond to this route
 waif('example).use(require('./src/example'));
 
 // Where to _listen_ for requests to this service
@@ -72,8 +73,7 @@ function, with the details already included.
      waif('event', '/path', opts, callbackFn);
 ```
 
-Ways of hosting a service
--------------------------
+#### Ways of hosting a service
 
 Waif does not provide any hosting functionality above and
 beyond the features of it's underlying technology.
@@ -112,21 +112,20 @@ app.use('/path', pathModule);
 
 
 
-About Service Configuration
----------------------------
+### About Service Configuration
 
 Each repository may contain zero or more of
 these entry points, which may represent one
 or more environments.
 
-
-Waif makes use of an imperative API, to make
-sure that the configuration format is
-turing-complete and able to represent all possible
-configurations.
+These may map services differently depending
+on how you need to access them.
 
 How the configuration gets into Waif is entirely
-up to the developer.
+up to the developer. It just provides the
+API to declare them, in a way that the services
+don't need to care about it.
+
 
 
 ### Guidelines
