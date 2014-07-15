@@ -15,11 +15,11 @@ used in production where we deploy our services using [Longshoreman](http://long
 Waif is a thin wrapper around express.js when we declare our  
 services, and a thin wrapper around request when we call them.
 
-It splits the declaration and configuration of the services,
-from the implementation of them, into separate files.
+It splits the declaration and implementation of the services into separate files.
 
 Doing this allows you the greatest amount of flexibility
-and scaleability, since you can run the service in many
+and scaleability,  
+since you can run the service in many
 environments.
 
 #### Declaring a service
@@ -27,7 +27,7 @@ environments.
 [Service Declaration Example](/example/service.js)
 
 You always declare the services in a separate file from
-where your implementation lists.
+where your implementation lives.
 
 When you declare a service you:
 
@@ -40,7 +40,7 @@ If your service is remote :
 
 ```javascript
 // The URL to _forward_ requests to this service to.
-waif('event').forward('http://event.example.com');`
+waif('event').forward('http://event.example.com');
 ```
 
 If you are hosting the service :
@@ -51,7 +51,6 @@ waif('example).use(require('./src/example'));
 
 // Where to _listen_ for requests to this service
 waif('example').listen(3000);
-
 ```
 
 Waif will then keep track of the url you need
@@ -85,7 +84,7 @@ service where to connect to.
 When creating a webserver in Node.js, your listen method
 supports several different formats.
 
-```
+```javascript
 // listen on port 3000
 http.listen(3000);
 
@@ -100,8 +99,8 @@ http.listen('/tmp/unix.socket');
 ```
 
 Additionally, through the use of express middleware:
-```javascript
 
+```javascript
 // middleware compatible
 app.use(expressApp);
 app.use(expressRouter);
@@ -109,7 +108,7 @@ app.use(handlerFn);
 
 // mounted on a specific path
 app.use('/path', pathModule);
-
+```
 
 
 ### About Service Configuration
