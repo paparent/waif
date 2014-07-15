@@ -13,14 +13,121 @@ used in production where we deploy our services using [Longshoreman](http://long
 ### How it works
 
 Waif is a thin wrapper around express.js when we declare our  
-services, and a thin wrapper around request when we call them.  
+services, and a thin wrapper around request when we call them.
 
-We make use of the fact that node's http server can also be mounted  
-on a unix domain socket, avoiding the use of an open port.  
+It splits the declaration and configuration of the services,
+from the implementation of them, into separate files.
 
-We also provide a simple utility to make requests to services  
-you have registered with us, to avoid hardcoding any credentials  
-in your services.
+Doing this allows you the greatest amount of flexibility
+and scaleability, since you can run the service in many
+environments.
+
+#### Declaring a service
+
+You always declare the services in a separate file from
+where your implementation lists.
+
+When you declare a service you:
+
+1. Assign it a name (ie: 'event')
+1. Provide the address to reach it. (remotely or locally)
+1. Start a web server to host it. (optional, if local)
+1. Providing configuration for it. (optional, service-specific)
+
+```javascript
+
+// If your service is remote:
+// -------------------------
+
+// The URL to forward requests to this service to.
+waif('event').forward('http://event.example.com');`
+
+// If you are hosting the service:
+// -------------------------------
+
+// The middleware to use to respond to this route
+waif('example).use(require('./src/example'));
+
+// Where to _listen_ for requests to this service
+waif('example').listen(3000);
+
+```
+
+Waif will then keep track of the url you need
+to provide to make a request against this service.
+
+#### Using a service
+
+In the services themselves, instead of having to use 
+use the credentials directly, you just use
+the service name.
+
+
+Waif will use the credentials it was given in the service
+declaration and provide you with a lightly wrapped request
+function, with the details already included.
+
+
+```javascript
+     waif('event', '/path', opts, callbackFn);
+```
+
+Ways of hosting a service
+-------------------------
+
+Waif does not provide any hosting functionality above and
+beyond the features of it's underlying technology.
+
+It exposes some of this functionality to you via it's API
+and keeps track of what you used so that it can tell the
+service where to connect to.
+
+When creating a webserver in Node.js, your listen method
+supports several different formats.
+
+```
+// listen on port 3000
+http.listen(3000);
+
+// listen on port 3000, ip 127.0.0.1
+http.listen('127.0.0.1:3000');
+
+// listen on a random port
+http.listen(0);
+
+// listen on a unix domain socket
+http.listen('/tmp/unix.socket');
+```
+
+Additionally, through the use of express middleware:
+```javascript
+
+// middleware compatible
+app.use(expressApp);
+app.use(expressRouter);
+app.use(handlerFn);
+
+// mounted on a specific path
+app.use('/path', pathModule);
+
+
+
+About Service Configuration
+---------------------------
+
+Each repository may contain zero or more of
+these entry points, which may represent one
+or more environments.
+
+
+Waif makes use of an imperative API, to make
+sure that the configuration format is
+turing-complete and able to represent all possible
+configurations.
+
+How the configuration gets into Waif is entirely
+up to the developer.
+
 
 ### Guidelines
 
@@ -90,50 +197,6 @@ May I suggest [Longshoreman](http://longshoreman.io)?
 
 ```javascript
 // filename: service.js
-
-// Return a new instance of Waif.
-var waif = require('waif')();
-
-// Configuration.
-var PORT = process.env.PORT || 3000;
-var SOCKET = process.env.SOCKET || '/tmp/sockets/test-data.sock';
-var MONGO_URL = process.env.MONGO_URL || "mongodb://localhost:27017/test";
-var EVENT_URL = process.env.EVENT_URL || 'http://event.example.com';
-
-// Declaring internally used service.
-waif('store')                               // data access service.
-  .use(require('waif-mongo-store'))         // uses mongo as a data store.
-  .config({url: MONGO_URL})                 // mongo db configuration.
-  .listen(SOCKET);                          // custom domain socket file.
-
-// Same, but from a local include instead of npm.
-waif('post-list')                           // custom data service.
-  .use(require('./src/post-list'))          // uses a relative require.
-  .config({url: MONGO_URL})                 // mongo db configuration.
-  .listen();                                // random domain socket file.
-
-// Declaring an external REST api.
-waif('event')                               // event logging service.
-  .config({ source: 'service:embed' })      // event source defaulted.
-  .forward(EVENT_URL);                      // all requests directed here.
-
-// Declaring a service to be mounted on another one.
-// From a relative submodule, with it's own views.
-// Note: the absence of forward() or listen()
-waif('gallery')                             // photo gallery service.
-  .use(require('./gallery'));               // relative submodule.
-
-
-// Example application service
-// Note how we .use() the waif('sandbox') service.
-waif('example')                             // the example service itself.
-  .use('/gallery', waif('sandbox'))         // mount the sandbox service.
-  .use(require('./src/example'))            // mount the service' own app.
-  .listen(PORT);                            // listen on a specific port.
-
-// Start up the servers.
-// Has a companion stop method which closes them all.
-waif.start();
 ```
 
 ### Example Service
@@ -141,35 +204,6 @@ waif.start();
 ```javascript
 // filename: src/example.js
 
-// Get the waif instance.
-var waif = require('waif')();
 
-// Normal Express app.
-var app = require('express')();
-
-// Services are simple request wrappers.
-var store = waif('store');
-var postList = waif('postList');
-
-// The REST is all up to you.
-app.get('/post/:id', function(req, res, next) {
-  store('/posts/' + req.param.id, _showBody('post');
-});
-
-app.get('/', function(req, res, next) {
-  dataList('/', _showBody('list'));
-});
-
-// export app instead of listening on a port
-module.exports = app;
-
-//// HELPERS
-
-function _showBody(template) {
-  return function(err, data) {
-    if (err) { return next(err); }
-    res.render('post', { body: data.body });
-  };
-}
 
 ```
