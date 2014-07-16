@@ -29,53 +29,62 @@ Service.createInstance = function(name) {
 
   // called directly
   var fn = function() {
-    console.trace();
-    return _request.bind(_service);
+    return _service.request.bind(_service);
   };
 
-  fn.request = _request.bind(_service);
-  fn.forward = _forward.bind(_service);
-  fn.listen  = _listen.bind(_service);
-  fn.config  = _config.bind(_service);
-  fn.use     = _use.bind(_service);
-  fn.start   = _start.bind(_service);
-  fn.stop    = _stop.bind(_service);
+  fn.instance = _service;
+  fn.request = _service.request.bind(_service);
+  fn.forward = _service.forward.bind(_service);
+  fn.listen  = _service.listen.bind(_service);
+  fn.config  = _service.config.bind(_service);
+  fn.use     = _service.use.bind(_service);
+  fn.start   = _service.start.bind(_service);
+  fn.stop    = _service.stop.bind(_service);
   return fn;
 };
 
 module.exports = Service;
 
 // make a request against a service
-function _request() {
-}
+Service.prototype.request = function() {
+};
 
 // mount services or paths
-function _use() {
+Service.prototype.use = function() {
   var args = norma('path:s? middleware:f', arguments);
-  var options = args.options();
+  var options = args.options;
   this.middleware.push(options);
-}
+  return this;
+};
 
 // Mount a service on a unix domain socket.
-function _listen(listenOn) {
+Service.prototype.listen = function(listenOn) {
   assert.equal(this.type, null, 'service:'+this.name+' couldn\'t listen.');
 
   this.listenOn = listenOn;
-}
+  return this;
+};
 
 // Mount a service on a http server.
-function _forward(forwardTo) {
+Service.prototype.forward = function(forwardTo) {
   assert.equal(this.type, null, 'service:'+this.name+' couldn\'t forward.');
 
   this.forwardTo = forwardTo;
-}
+  return this;
+};
 
-function _config() { }
+Service.prototype.config = function() {
+  return this;
+};
 
 // builds an express app if needed
-function _start() { }
+Service.prototype.start = function() {
+  return this;
+};
 
 // stops listening on ports/sockets
-function _stop() {}
+Service.prototype.stop = function() {
+  return this;
+};
 
 

@@ -28,6 +28,10 @@ Waif.prototype.service = function() {
   return this._services[name];
 };
 
+Waif.prototype.start = function() {
+  return this;
+};
+
 Waif.createInstance = function() {
   var _waif = new Waif();
   var fn = function() {
@@ -38,7 +42,9 @@ Waif.createInstance = function() {
   };
   fn._id = _.uniqueId();
 
+  fn.instance = _waif;
   fn.createInstance = Waif.createInstance;
+  fn.start = _waif.start.bind(_waif);
 
   return fn;
 };
