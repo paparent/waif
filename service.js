@@ -119,6 +119,11 @@ Service.prototype.config = function(options) {
 // emits a start event
 Service.prototype.start = function(server) {
   this.emit('start');
+  _(this.services).each(function(service, name) {
+    if (service.type === 'listen') {
+      service.listen(this.url);
+    }
+  });
   return this;
 };
 
