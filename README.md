@@ -127,8 +127,6 @@ up to the developer. It just provides the
 API to declare them, in a way that the services
 don't need to care about it.
 
-
-
 ### Guidelines
 
 These are things to keep in mind when developing microservices for use with Waif.  
