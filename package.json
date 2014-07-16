@@ -31,6 +31,7 @@
     "lodash": "^2.4.1",
     "norma": "^0.2.6",
     "request": "^2.37.0",
+    "temporary": "0.0.8",
     "utils-merge": "^1.0.0"
   }
 }

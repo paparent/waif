@@ -1,8 +1,11 @@
+var EventEmitter = require('events').EventEmitter;
+var temporary = require('temporary');
 var request = require('request');
 var assert = require('assert');
 var norma = require('norma');
+var isUrl = require('is-url');
+var util = require('util');
 var _ = require('lodash');
-
 
 /**
 * Service constructor.
@@ -24,6 +27,11 @@ function Service(name) {
   return this;
 }
 
+// Each service is also an event emitter,
+// to allow you to get notifications of
+// start, stop and configure.
+util.inherits(Service, EventEmitter);
+
 Service.createInstance = function(name) {
   var _service = new Service(name);
 
@@ -33,13 +41,14 @@ Service.createInstance = function(name) {
   };
 
   fn.instance = _service;
-  fn.request = _service.request.bind(_service);
-  fn.forward = _service.forward.bind(_service);
-  fn.listen  = _service.listen.bind(_service);
-  fn.config  = _service.config.bind(_service);
-  fn.use     = _service.use.bind(_service);
-  fn.start   = _service.start.bind(_service);
-  fn.stop    = _service.stop.bind(_service);
+  var proxyMethods = [
+    'request', 'forward', 'listen', 'use',
+    'start', 'stop', 'on', 'config'
+  ];
+
+  _(proxyMethods).each(function(method) {
+    fn[method] = _service[method].bind(_service);
+  });
   return fn;
 };
 
@@ -47,13 +56,38 @@ module.exports = Service;
 
 // make a request against a service
 Service.prototype.request = function() {
+  assert.notEqual(this.type, null, 'service:'+this.name+' not mounted.');
+  assert.notEqual(this.url, null, 'service:'+this.name+' has no url.');
+  
+  var args = norma('s, .*', arguments);
+  args[0] = this.getUrl() + args[0];
+
+  return request.apply(request, args);
+};
+
+// Get the URL to direct to.
+Service.prototype.getUrl = function() {
+  assert.notEqual(this.type, null, 'service:'+this.name+' not mounted.');
+  return (this.type === 'listen') ? this.listenOn: this.forwardTo;
+};
+
+// Populate the target correctly.
+Service.prototype.prepareUrl = function(url) {
+  if (!!url) {
+    var tmp = new temporary.File();
+    return tmp.path;
+  } else if (_.isNumber(url)) {
+    return '127.0.0.1:'+url;
+  } else if (isUrl(url)) {
+    return url;
+  }
+  return false;
 };
 
 // mount services or paths
 Service.prototype.use = function() {
-  var args = norma('path:s? middleware:f', arguments);
-  var options = args.options;
-  this.middleware.push(options);
+  var args = norma('{path:s? middleware:f}', arguments);
+  this.middleware.push(args);
   return this;
 };
 
@@ -61,7 +95,8 @@ Service.prototype.use = function() {
 Service.prototype.listen = function(listenOn) {
   assert.equal(this.type, null, 'service:'+this.name+' couldn\'t listen.');
 
-  this.listenOn = listenOn;
+  this.type = 'listen';
+  this.url = this.prepareUrl(listenOn);
   return this;
 };
 
@@ -69,21 +104,28 @@ Service.prototype.listen = function(listenOn) {
 Service.prototype.forward = function(forwardTo) {
   assert.equal(this.type, null, 'service:'+this.name+' couldn\'t forward.');
 
-  this.forwardTo = forwardTo;
+  this.type = 'forward';
+  this.forwardTo = this.prepareUrl(forwardTo);
   return this;
 };
 
-Service.prototype.config = function() {
+// Set configuration. Emits an event to handle.
+Service.prototype.config = function(options) {
+  this.emit('config', options);
   return this;
 };
 
 // builds an express app if needed
-Service.prototype.start = function() {
+// emits a start event
+Service.prototype.start = function(server) {
+  this.emit('start');
   return this;
 };
 
 // stops listening on ports/sockets
+// emits a stop event
 Service.prototype.stop = function() {
+  this.emit('stop');
   return this;
 };
 
