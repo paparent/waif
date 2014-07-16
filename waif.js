@@ -22,7 +22,7 @@ Waif.prototype.service = function() {
   var name = args[0];
 
   if (!this._services[name]) {
-    this._services[name] = Service.createInstance();
+    this._services[name] = Service.createInstance(name);
   }
 
   return this._services[name];

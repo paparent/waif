@@ -11,7 +11,10 @@ var _ = require('lodash');
 * services that have been mounted onto the
 * system.
 */
-function Service() {
+function Service(name) {
+  assert(name, "service not supplied with name");
+
+  this.name       = name;
   this.options    = {};
   this.middleware = [];
   this.type       = null;
@@ -21,8 +24,8 @@ function Service() {
   return this;
 }
 
-Service.createInstance = function() {
-  var _service = new Service();
+Service.createInstance = function(name) {
+  var _service = new Service(name);
 
   // called directly
   var fn = function() {
@@ -48,21 +51,21 @@ function _request() {
 
 // mount services or paths
 function _use() {
-  var args = norma('path:s? middleware:o', arguments);
+  var args = norma('path:s? middleware:f', arguments);
   var options = args.options();
   this.middleware.push(options);
 }
 
 // Mount a service on a unix domain socket.
 function _listen(listenOn) {
-  assert(this.type, 'service:'+this.name+' couldn\'t listen.');
+  assert.equal(this.type, null, 'service:'+this.name+' couldn\'t listen.');
 
   this.listenOn = listenOn;
 }
 
 // Mount a service on a http server.
 function _forward(forwardTo) {
-  assert(this.type, 'service:'+this.name+' couldn\'t forward.');
+  assert.equal(this.type, null, 'service:'+this.name+' couldn\'t forward.');
 
   this.forwardTo = forwardTo;
 }
