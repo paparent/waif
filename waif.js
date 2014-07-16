@@ -13,7 +13,7 @@ var Service = require('./service');
 */
 function Waif(opts) {
   this._services = {};
-  return this.service.bind(this);
+  return this;
 }
 
 // retrieve or set a service
@@ -36,6 +36,7 @@ Waif.createInstance = function() {
 
     return _waif.service(name);
   };
+  fn._id = _.uniqueId();
 
   fn.createInstance = Waif.createInstance;
 
@@ -43,16 +44,20 @@ Waif.createInstance = function() {
 };
 
 Waif._instance = null;
-Waif.getInstance = _getInstance;
 
-module.exports = Waif._getInstance();
-
-
-function _getInstance() {
-  if(this.instance === null){
+Waif.getInstance = function() {
+  if(this._instance === null){
     this._instance = Waif.createInstance();
   }
   return this._instance;
-}
+};
 
+
+module.exports = _makeExport();
+
+function _makeExport() {
+  var fn = Waif.getInstance.bind(Waif);
+  fn.createInstance = Waif.createInstance;
+  return fn;
+}
 

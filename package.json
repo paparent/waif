@@ -25,6 +25,8 @@
     "should": "^4.0.4"
   },
   "dependencies": {
+    "dummy-api": "0.0.1",
+    "express": "^4.6.1",
     "is-url": "^1.1.0",
     "lodash": "^2.4.1",
     "norma": "^0.2.6",

@@ -1,46 +1,51 @@
 /* global describe, it, before, beforeEach, after, afterEach */
 var should = require('should');
 var url = require('url');
-var waif = require('waif')();
+var waif = require('../')();
 var service = require('./fixture/data-service');
 
-describe('Mount', function() {
+describe.skip('Mount', function() {
+  beforeEach(function() {
+    // make an instance
+  });
+
   describe('remote services', function() {
     var serviceUrl = 'http://service.example.com/'; 
 
     it('can be mounted as a url string', function() {
-      waif('serviceName').remote(serviceUrl);
+      waif('serviceName').forward(serviceUrl);
     });
 
     it('can be mounted as a parsed url object', function() {
-      waif('serviceName').remote(url.parse(serviceUrl));
+      waif('serviceName').forward(url.parse(serviceUrl));
     });
   });
 
   describe('local services', function() {
 
     it('should create a random socket', function() {
-      waif('serviceName').mount(service);
+      waif('serviceName').use(service).listen();
     });
 
     it('should allow you to specify a socket', function() {
-      var filename = '/tmp/sockets/service-name';
+      var filename = '/tmp/sockets/service-name.socket';
       waif('serviceName')
-          .local(filename)
-          .mount(service);
+        .mount(service)
+        .listen(filename);
     });
 
   });
 
   describe('listen services', function() {
-    var service = express();
+    before(function() {
+      waif('listenTest')
+        .use(service)
+        .listen(3000);
 
-    waif('listenTest')
-        .listen(3000)
-        .mount(service);
-
-    waif('listenTest')
-        .listen('/path')
-        .mount(service);
+      var filename = '/tmp/sockets/service-name.socket';
+      waif('listenTest')
+        .use(service)
+        .listen(filename);
+    });
   });
 });

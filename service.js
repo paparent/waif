@@ -26,7 +26,8 @@ Service.createInstance = function() {
 
   // called directly
   var fn = function() {
-    _request.apply(_service, arguments);
+    console.trace();
+    return _request.bind(_service);
   };
 
   fn.request = _request.bind(_service);
@@ -39,8 +40,7 @@ Service.createInstance = function() {
   return fn;
 };
 
-module.exports = Service.createInstance;
-
+module.exports = Service;
 
 // make a request against a service
 function _request() {
@@ -48,7 +48,7 @@ function _request() {
 
 // mount services or paths
 function _use() {
-  var args = norma('path:s? middleware:o');
+  var args = norma('path:s? middleware:o', arguments);
   var options = args.options();
   this.middleware.push(options);
 }

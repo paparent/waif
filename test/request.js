@@ -2,11 +2,12 @@
 var should = require('should');
 
 
-var waif = require('waif');
+var Waif = require('../');
 
-describe('request service', function() {
+describe.skip('request service', function() {
+  var waif = null;
   before(function() {
-
+    waif = waif.createInstance();
   });
 
   it('request closure', function(doneFn) {

@@ -47,7 +47,7 @@ If you are hosting the service :
 
 ```javascript
 // The middleware to _use_ to respond to this route
-waif('example).use(require('./src/example'));
+waif('example').use(require('./src/example'));
 
 // Where to _listen_ for requests to this service
 waif('example').listen(3000);
