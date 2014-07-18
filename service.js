@@ -2,6 +2,7 @@ var EventEmitter = require('events').EventEmitter;
 var temporary = require('temporary');
 var request = require('request');
 var assert = require('assert');
+var express = require('express');
 var norma = require('norma');
 var isUrl = require('is-url');
 var util = require('util');
@@ -73,7 +74,7 @@ Service.prototype.getUrl = function() {
 
 // Populate the target correctly.
 Service.prototype.prepareUrl = function(url) {
-  if (!!url) {
+  if (!url) {
     var tmp = new temporary.File();
     return tmp.path;
   } else if (_.isNumber(url)) {
@@ -119,11 +120,14 @@ Service.prototype.config = function(options) {
 // emits a start event
 Service.prototype.start = function(server) {
   this.emit('start');
-  _(this.services).each(function(service, name) {
-    if (service.type === 'listen') {
-      service.listen(this.url);
-    }
-  });
+
+  if (this.type === 'listen') {
+    var app = express();
+    _(this.middleware).each(function(mw) {
+      app.use(mw.middleware);
+    });
+    app.listen(this.url);
+  }
   return this;
 };
 

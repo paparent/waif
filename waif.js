@@ -29,6 +29,7 @@ Waif.prototype.service = function() {
 };
 
 Waif.prototype.start = function() {
+  _(this._services).invoke('start');
   return this;
 };
 
