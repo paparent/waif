@@ -89,7 +89,7 @@ Service.prototype.prepareUrl = function(url) {
     return temp.path();
   } else if (_.isNumber(url)) {
     this.connType = 'port';
-    return '127.0.0.1:'+url;
+    return url;
   } else if (isUrl(url)) {
     this.connType = 'url';
     return url;
