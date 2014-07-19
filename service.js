@@ -48,7 +48,10 @@ Service.createInstance = function(name) {
   ];
 
   _(proxyMethods).each(function(method) {
-    fn[method] = _service[method].bind(_service);
+    fn[method] = function() {
+      _service[method].apply(_service, arguments);
+      return fn;
+    };
   });
   return fn;
 };
@@ -76,10 +79,13 @@ Service.prototype.getUrl = function() {
 Service.prototype.prepareUrl = function(url) {
   if (!url) {
     var tmp = new temporary.File();
+    this.connType = 'file';
     return tmp.path;
   } else if (_.isNumber(url)) {
+    this.connType = 'port';
     return '127.0.0.1:'+url;
   } else if (isUrl(url)) {
+    this.connType = 'url';
     return url;
   }
   return false;
@@ -122,11 +128,12 @@ Service.prototype.start = function(server) {
   this.emit('start');
 
   if (this.type === 'listen') {
-    var app = express();
+    this.app = express();
     _(this.middleware).each(function(mw) {
-      app.use(mw.middleware);
-    });
-    app.listen(this.url);
+      this.app.use(mw.middleware);
+    }, this);
+    console.log(this.name, this.url);
+    this.app.listen(this.url);
   }
   return this;
 };
@@ -135,6 +142,7 @@ Service.prototype.start = function(server) {
 // emits a stop event
 Service.prototype.stop = function() {
   this.emit('stop');
+  this.app && this.app.close();
   return this;
 };
 

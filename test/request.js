@@ -12,13 +12,15 @@ describe('request local service', function() {
 
   before(function() {
     waif = Waif.createInstance();
-
     this.service = waif('local')
       .use(spy)
       .listen();
+    waif.start();
   });
 
-  afterEach(function() {
+
+  after(function() {
+    waif.stop();
     spy.reset();
   });
 
@@ -27,6 +29,7 @@ describe('request local service', function() {
 
     function test(err, resp, body) {
       spy.calledOnce;
+      doneFn();
     }
   });
 

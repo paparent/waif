@@ -24,7 +24,6 @@ Waif.prototype.service = function() {
   if (!this._services[name]) {
     this._services[name] = Service.createInstance(name);
   }
-
   return this._services[name];
 };
 
@@ -32,6 +31,12 @@ Waif.prototype.start = function() {
   _(this._services).invoke('start');
   return this;
 };
+
+Waif.prototype.stop = function() {
+  _(this._services).invoke('stop');
+  return this;
+};
+
 
 Waif.createInstance = function() {
   var _waif = new Waif();
@@ -46,6 +51,7 @@ Waif.createInstance = function() {
   fn.instance = _waif;
   fn.createInstance = Waif.createInstance;
   fn.start = _waif.start.bind(_waif);
+  fn.stop = _waif.stop.bind(_waif);
 
   return fn;
 };
