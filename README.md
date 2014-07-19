@@ -88,16 +88,19 @@ supports several different formats.
 
 ```javascript
 // listen on port 3000
-http.listen(3000);
+wait('event').listen(3000);
 
 // listen on port 3000, ip 127.0.0.1
-http.listen('127.0.0.1:3000');
+wait('event').listen('127.0.0.1:3000');
 
 // listen on a random port
-http.listen(0);
+wait('event').listen(0);
 
 // listen on a unix domain socket
-http.listen('/tmp/unix.socket');
+wait('event').listen('unix:///tmp/unix.socket');
+
+// It also adds the ability to use a random socket file.
+waif('event').listen();
 ```
 
 Additionally, through the use of express middleware:

@@ -2,7 +2,6 @@ var EventEmitter = require('events').EventEmitter;
 var request      = require('request');
 var assert       = require('assert');
 var express      = require('express');
-var logger       = require('morgan');
 var norma        = require('norma');
 var debug        = require('debug')('waif:service');
 var temp         = require('temp').track();
@@ -71,6 +70,10 @@ Service.prototype.request = function() {
   var args = norma('s, .*', arguments);
   args[0] = this.url + args[0];
 
+  if (this.connType === 'socket') {
+    args[0] = 'unix://' + args[0];
+  }
+
   return request.apply(request, args);
 };
 
@@ -85,7 +88,7 @@ Service.prototype.getUrl = function() {
 Service.prototype.prepareUrl = function(url) {
   debug('prepare url request on service: %s, %s', this.name, url);
   if (!url) {
-    this.connType = 'file';
+    this.connType = 'socket';
     return temp.path();
   } else if (_.isNumber(url)) {
     this.connType = 'port';
@@ -99,7 +102,7 @@ Service.prototype.prepareUrl = function(url) {
 
 // mount services or paths
 Service.prototype.use = function() {
-  var args = norma('{path:s? middleware:f}', arguments);
+  var args = norma('s?, f}', arguments);
   this.middleware.push(args);
   debug('use middlware on service: %s, %s', this.name, args.path);
   return this;
@@ -139,14 +142,19 @@ Service.prototype.start = function(server) {
 
   if (this.type === 'listen') {
     this.app = express();
-    this.app.use(logger());
-    _(this.middleware).each(function(mw) {
-      this.app.use(mw.middleware);
-    }, this);
+
+    _(this.middleware).each(_use, this);
+
     this.app.listen(this.url);
-    this.emit('start');
   }
+
+  this.emit('start');
+
   return this;
+
+  function _use(mw) {
+    this.use.apply(this, mw);
+  }
 };
 
 // stops listening on ports/sockets

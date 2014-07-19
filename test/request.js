@@ -29,7 +29,7 @@ describe('request local service', function() {
     this.service('/path/here', test);
 
     function test(err, resp, body) {
-      //spy.calledOnce;
+      spy.calledOnce;
       doneFn();
     }
   });
@@ -45,6 +45,5 @@ describe('request local service', function() {
 //// Helpers
 
 function _middleware(req, res, next) {
-  console.log(arguments);
   res.send({msg: 'ok'});
 }
