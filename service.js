@@ -1,12 +1,12 @@
 var EventEmitter = require('events').EventEmitter;
-var temporary = require('temporary');
-var request = require('request');
-var assert = require('assert');
-var express = require('express');
-var norma = require('norma');
-var isUrl = require('is-url');
-var util = require('util');
-var _ = require('lodash');
+var request      = require('request');
+var assert       = require('assert');
+var express      = require('express');
+var norma        = require('norma');
+var temp         = require('temp').track();
+var isUrl        = require('is-url');
+var util         = require('util');
+var _            = require('lodash');
 
 /**
 * Service constructor.
@@ -75,12 +75,11 @@ Service.prototype.getUrl = function() {
   return (this.type === 'listen') ? this.listenOn: this.forwardTo;
 };
 
-// Populate the target correctly.
+// Populate the target url.
 Service.prototype.prepareUrl = function(url) {
   if (!url) {
-    var tmp = new temporary.File();
     this.connType = 'file';
-    return tmp.path;
+    return temp.path();
   } else if (_.isNumber(url)) {
     this.connType = 'port';
     return '127.0.0.1:'+url;

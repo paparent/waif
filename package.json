@@ -32,7 +32,7 @@
     "norma": "^0.2.6",
     "request": "^2.37.0",
     "sinon": "^1.10.3",
-    "temporary": "0.0.8",
+    "temp": "^0.8.0",
     "utils-merge": "^1.0.0"
   }
 }
