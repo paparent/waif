@@ -2,6 +2,7 @@ var EventEmitter = require('events').EventEmitter;
 var request      = require('request');
 var assert       = require('assert');
 var express      = require('express');
+var logger       = require('morgan');
 var norma        = require('norma');
 var temp         = require('temp').track();
 var isUrl        = require('is-url');
@@ -124,15 +125,16 @@ Service.prototype.config = function(options) {
 // builds an express app if needed
 // emits a start event
 Service.prototype.start = function(server) {
-  this.emit('start');
 
   if (this.type === 'listen') {
     this.app = express();
+    this.app.use(logger());
     _(this.middleware).each(function(mw) {
+      console.log(mw);
       this.app.use(mw.middleware);
     }, this);
-    console.log(this.name, this.url);
     this.app.listen(this.url);
+    this.emit('start');
   }
   return this;
 };
@@ -141,8 +143,9 @@ Service.prototype.start = function(server) {
 // emits a stop event
 Service.prototype.stop = function() {
   this.emit('stop');
-  this.app && this.app.close();
+  if (this.type === 'listen') {
+    console.log(this.app);
+    this.app && this.app.close();
+  }
   return this;
 };
-
-
