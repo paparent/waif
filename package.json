@@ -25,6 +25,7 @@
     "should": "^4.0.4"
   },
   "dependencies": {
+    "debug": "^1.0.4",
     "dummy-api": "0.0.1",
     "express": "^4.6.1",
     "is-url": "^1.1.0",

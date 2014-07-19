@@ -4,6 +4,7 @@ var assert       = require('assert');
 var express      = require('express');
 var logger       = require('morgan');
 var norma        = require('norma');
+var debug        = require('debug')('waif:service');
 var temp         = require('temp').track();
 var isUrl        = require('is-url');
 var util         = require('util');
@@ -19,6 +20,7 @@ var _            = require('lodash');
 function Service(name) {
   assert(name, "service not supplied with name");
 
+  debug('new service: %s', name);
   this.name       = name;
   this.options    = {};
   this.middleware = [];
@@ -39,7 +41,8 @@ Service.createInstance = function(name) {
 
   // called directly
   var fn = function() {
-    return _service.request.bind(_service);
+    debug('request proxy on service: %s', name);
+    return _service.request.apply(_service, arguments);
   };
 
   fn.instance = _service;
@@ -61,23 +64,26 @@ module.exports = Service;
 
 // make a request against a service
 Service.prototype.request = function() {
+  debug('request on service: %s', this.name);
   assert.notEqual(this.type, null, 'service:'+this.name+' not mounted.');
   assert.notEqual(this.url, null, 'service:'+this.name+' has no url.');
   
   var args = norma('s, .*', arguments);
-  args[0] = this.getUrl() + args[0];
+  args[0] = this.url + args[0];
 
   return request.apply(request, args);
 };
 
 // Get the URL to direct to.
 Service.prototype.getUrl = function() {
+  
   assert.notEqual(this.type, null, 'service:'+this.name+' not mounted.');
   return (this.type === 'listen') ? this.listenOn: this.forwardTo;
 };
 
 // Populate the target url.
 Service.prototype.prepareUrl = function(url) {
+  debug('prepare url request on service: %s, %s', this.name, url);
   if (!url) {
     this.connType = 'file';
     return temp.path();
@@ -95,11 +101,13 @@ Service.prototype.prepareUrl = function(url) {
 Service.prototype.use = function() {
   var args = norma('{path:s? middleware:f}', arguments);
   this.middleware.push(args);
+  debug('use middlware on service: %s, %s', this.name, args.path);
   return this;
 };
 
 // Mount a service on a unix domain socket.
 Service.prototype.listen = function(listenOn) {
+  debug('listen on service: %s', this.name);
   assert.equal(this.type, null, 'service:'+this.name+' couldn\'t listen.');
 
   this.type = 'listen';
@@ -109,15 +117,17 @@ Service.prototype.listen = function(listenOn) {
 
 // Mount a service on a http server.
 Service.prototype.forward = function(forwardTo) {
+  debug('forward on service: %s', this.name);
   assert.equal(this.type, null, 'service:'+this.name+' couldn\'t forward.');
 
   this.type = 'forward';
-  this.forwardTo = this.prepareUrl(forwardTo);
+  this.url = this.prepareUrl(forwardTo);
   return this;
 };
 
 // Set configuration. Emits an event to handle.
 Service.prototype.config = function(options) {
+  debug('config on service: %s', this.name);
   this.emit('config', options);
   return this;
 };
@@ -125,12 +135,12 @@ Service.prototype.config = function(options) {
 // builds an express app if needed
 // emits a start event
 Service.prototype.start = function(server) {
+  debug('start on service: %s', this.name);
 
   if (this.type === 'listen') {
     this.app = express();
     this.app.use(logger());
     _(this.middleware).each(function(mw) {
-      console.log(mw);
       this.app.use(mw.middleware);
     }, this);
     this.app.listen(this.url);
@@ -142,9 +152,9 @@ Service.prototype.start = function(server) {
 // stops listening on ports/sockets
 // emits a stop event
 Service.prototype.stop = function() {
+  debug('stop on service: %s', this.name);
   this.emit('stop');
   if (this.type === 'listen') {
-    console.log(this.app);
     this.app && this.app.close();
   }
   return this;

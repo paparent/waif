@@ -1,5 +1,6 @@
 var request = require('request');
 var norma = require('norma');
+var debug = require('debug', 'waif:waif');
 var assert = require('assert');
 var _ = require('lodash');
 var Service = require('./service');
@@ -21,6 +22,7 @@ Waif.prototype.service = function() {
   var args = norma('s', arguments);
   var name = args[0];
 
+  debug('service', args);
   if (!this._services[name]) {
     this._services[name] = Service.createInstance(name);
   }
@@ -28,12 +30,15 @@ Waif.prototype.service = function() {
 };
 
 Waif.prototype.start = function() {
+  debug('start');
+  
   _(this._services).invoke('start');
   return this;
 };
 
 Waif.prototype.stop = function() {
-  _(this._services).invoke('stop');
+  debug('start');
+  //_(this._services).invoke('stop');
   return this;
 };
 
