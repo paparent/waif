@@ -103,7 +103,10 @@ Service.prototype.initialize = function() {
     request: function() {
       var args = norma('s, .*', arguments);
 
-      args[0] = this.uri.requestUrl(args[0]);
+      args[0] = {
+        uri: this.uri.requestUrl(args[0]),
+        json: true
+      };
 
       debug('request on service: %s, %o', this.name, args);
       return request.apply(request, args);
