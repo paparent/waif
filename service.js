@@ -103,7 +103,7 @@ Service.prototype.prepareUrl = function(url) {
 Service.prototype.use = function() {
   var args = norma('s?, f}', arguments);
   this.middleware.push(args);
-  debug('use middlware on service: %s, %s', this.name, args);
+  debug('use middlware on service: %s', this.name);
   return this;
 };
 
@@ -138,14 +138,20 @@ Service.prototype.config = function(options) {
 // emits a start event
 Service.prototype.start = function(server) {
 
+  var name = this.name;
+  var url = this.url;
+
   if (this.type === 'listen') {
     debug('create app for service: %s', this.name);
+
     this.app = express();
 
     _(this.middleware).each(_use, this);
 
-    debug('listen for service on url: %s, %s', this.name, this.url);
-    this.app.listen(this.url);
+    this.app.listen(url, function(err) {
+      debug('listen for service on url: %s, %s', name, url);
+      assert.equal(err, null, 'service:'+name+' couldn\'t listen on '+url);
+    });
   }
 
   debug('start on service: %s', this.name);
