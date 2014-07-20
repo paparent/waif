@@ -10,8 +10,23 @@ var _ = require('lodash');
 module.exports = state({
   // Possible states for the URI
   Initial: state('initial', {
+
+    // Change state based on input.
     set: function(input) {
       this.input = input;
+ 
+      // format: 3000
+      if (_.isNumber(input)) {
+        this.state().go('Port');
+
+      // format: 'http://api.example.com'
+      } else if (isUrl(input)) {
+        this.state().go('Url');
+
+      // format: '/filename.sock' or undefined
+      } else {
+        this.state().go('File');
+      }
     },
     listen: function(input) {
       this.mode = 'listen';
