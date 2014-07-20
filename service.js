@@ -102,7 +102,7 @@ Service.prototype.prepareUrl = function(url) {
 // mount services or paths
 Service.prototype.use = function() {
   var args = norma('s?, f}', arguments);
-  this.middleware.push(args);
+  this.middleware.push(_.compact(args));
   debug('use middlware on service: %s', this.name);
   return this;
 };
@@ -140,15 +140,16 @@ Service.prototype.start = function(server) {
 
   var name = this.name;
   var url = this.url;
+  var app = null;
 
   if (this.type === 'listen') {
     debug('create app for service: %s', this.name);
 
-    this.app = express();
+    this.app = app = express();
 
     _(this.middleware).each(_use, this);
 
-    this.app.listen(url, function(err) {
+    app.listen(url, function(err) {
       debug('listen for service on url: %s, %s', name, url);
       assert.equal(err, null, 'service:'+name+' couldn\'t listen on '+url);
     });
@@ -161,7 +162,7 @@ Service.prototype.start = function(server) {
   return this;
 
   function _use(mw) {
-    this.use.apply(this, mw);
+    app.use.apply(app, mw);
   }
 };
 

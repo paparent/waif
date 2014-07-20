@@ -14,7 +14,7 @@ describe('request local service', function() {
   before(function() {
     waif = Waif.createInstance();
     this.service = waif('local')
-      .use(spy)
+      .use(_middleware)
       .listen();
 
     waif.start();
