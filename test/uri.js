@@ -19,4 +19,8 @@ describe('URI state machine', function() {
     should.exist(uri.state);
     uri.state.should.be.Function;
   });
+
+  it('should have Initial state', function() {
+    uri.state().name.should.equal('Initial');
+  });
 });
