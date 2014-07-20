@@ -24,8 +24,8 @@ function Service(name) {
   this.options    = {};
   this.middleware = [];
   this.type       = null;
-  this.listenOn   = null;
-  this.forwardTo  = null;
+  this.connType   = null;
+  this.url        = null;
   this.running    = false;
   return this;
 }
@@ -63,17 +63,16 @@ module.exports = Service;
 
 // make a request against a service
 Service.prototype.request = function() {
-  debug('request on service: %s', this.name);
   assert.notEqual(this.type, null, 'service:'+this.name+' not mounted.');
   assert.notEqual(this.url, null, 'service:'+this.name+' has no url.');
-  
   var args = norma('s, .*', arguments);
-  args[0] = this.url + args[0];
 
-  if (this.connType === 'socket') {
-    args[0] = 'unix://' + args[0];
-  }
+  var proto = (this.connType === 'socket') ? 'unix:/' : 'http://';
+  var host = (this.connType === 'port') ? '127.0.0.1:' : '';
 
+  args[0] = proto + host + this.url + args[0];
+
+  debug('request on service: %s, %o', this.name, args);
   return request.apply(request, args);
 };
 
@@ -104,7 +103,7 @@ Service.prototype.prepareUrl = function(url) {
 Service.prototype.use = function() {
   var args = norma('s?, f}', arguments);
   this.middleware.push(args);
-  debug('use middlware on service: %s, %s', this.name, args.path);
+  debug('use middlware on service: %s, %s', this.name, args);
   return this;
 };
 
@@ -138,16 +137,19 @@ Service.prototype.config = function(options) {
 // builds an express app if needed
 // emits a start event
 Service.prototype.start = function(server) {
-  debug('start on service: %s', this.name);
 
   if (this.type === 'listen') {
+    debug('create app for service: %s', this.name);
     this.app = express();
 
     _(this.middleware).each(_use, this);
 
+    debug('listen for service on url: %s, %s', this.name, this.url);
     this.app.listen(this.url);
   }
 
+  debug('start on service: %s', this.name);
+  this.running = true;
   this.emit('start');
 
   return this;
@@ -162,6 +164,7 @@ Service.prototype.start = function(server) {
 Service.prototype.stop = function() {
   debug('stop on service: %s', this.name);
   this.emit('stop');
+  this.running = false;
   if (this.type === 'listen') {
     this.app && this.app.close();
   }
