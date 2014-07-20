@@ -6,7 +6,9 @@
 var state = require('state');
 var isUrl = require('is-url');
 var _ = require('lodash');
-
+var url = require('url');
+var path = require('path');
+var temp         = require('temp').track();
 
 var Uri = function(options) {
   this.initialize();
@@ -22,40 +24,42 @@ Uri.prototype.initialize = function() {
       set: function(input) {
         this.input = input;
 
-        // format: 3000
-        if (_.isNumber(input)) {
-          this.state().go('Port');
-
-          // format: 'http://api.example.com'
-        } else if (isUrl(input)) {
-          this.state().go('Url');
-
-          // format: '/filename.sock' or undefined
-        } else {
-          this.state().go('File');
-        }
-      },
-      listen: function(input) {
-        this.mode = 'listen';
-        this.set(input);
-      },
-      forward: function(input) {
-        this.mode = 'forward';
-        this.set(input);
+        // attempt each state in order.
+        // guards will stop them.
+        this.state().go('Port');
+        this.state().go('Url');
+        this.state().go('File');
       }
     }),
-    Url: state(),
-    Port: state(),
-    File: state(),
+    Url: state({
+      admit: { // format: 'http://api.example.com'
+        Initial: function() { return isUrl(this.owner.input); }
+      },
+      arrive: function() {
+        this.url = url.parse(this.input);
+      }
+    }),
+    Port: state({
+      admit: { // format: 3000
+        Initial: function() { return _.isNumber(this.owner.input); }
+      },
+      arrive: function() {
+        this.url = url.parse('http://127.0.0.1:' + this.input);
+      }
+    }),
+    File: state({
+      admit: { // format: '/filename.sock' or undefined
+        Initial: function() { return true; }
+      },
+      arrive: function() {
+        this.url = this.input || temp.path();
+      } 
+    }),
 
     // default for all
     get: function() {
-      return this.input;
+      return this.url;
     },
-
-    // noops in all but initial state.
-    listen: function() {},
-    forward: function() {}
   });
 };
 

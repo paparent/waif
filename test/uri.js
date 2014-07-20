@@ -23,15 +23,19 @@ describe('URI state machine', function() {
     uri.state().name.should.equal('Initial');
   });
 
-  it('should be able to change state', function() {
+  it('should not be able to go Url', function() {
     // officially sanction method
     uri.state().change('Url');
-    uri.state().name.should.equal('Url');
+    uri.state().name.should.equal('Initial');
 
+  });
+  it('should not be able to go Port', function() {
     // more convenient alias
     uri.state().go('Port');
-    uri.state().name.should.equal('Port');
+    uri.state().name.should.equal('Initial');
 
+  });
+  it('should be able to go File', function() {
     // magic shorthand. not recommended
     uri.state('-> File');
     uri.state().name.should.equal('File');
@@ -44,6 +48,11 @@ describe('change states with input', function() {
   // wrap the object with a state machine
   beforeEach(function() {
     uri = new Uri();
+  });
+
+  it('should consider no input a filename', function() {
+    uri.set();
+    uri.state().name.should.equal('File');
   });
 
   it('should handle ports', function() {
@@ -63,9 +72,4 @@ describe('change states with input', function() {
     uri.state().name.should.equal('File');
   });
 
-
-  it('should consider no input a filename', function() {
-    uri.set();
-    uri.state().name.should.equal('File');
-  });
 });
