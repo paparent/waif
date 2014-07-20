@@ -6,6 +6,7 @@
 var state = require('state');
 var isUrl = require('is-url');
 var _ = require('lodash');
+var norma = require('norma');
 var url = require('url');
 var path = require('path');
 var temp         = require('temp').track();
@@ -56,12 +57,14 @@ Uri.prototype.initialize = function() {
       },
       arrive: function() {
         this.filename = this.input || temp.path();
+        this.url = url.parse('unix:/' + this.filename);
       },
-      get: function() {
+      getFilename: function() {
         return this.filename;
       },
-      requestUrl: function(_path) {
-        return 'unix:/' + path.join(this.filename, _path || '');
+
+      _joinPath: function() {
+        return path.join.apply(path, arguments);
       },
       listenUrl: function() {
         return [this.filename];
@@ -77,10 +80,12 @@ Uri.prototype.initialize = function() {
     requestUrl: function(_path) {
       var _url = _.clone(this.url);
       var _path = (_path || '').replace(/^\//, '');
-      _url.path = _url.pathname = url.resolve(_url.path, _path);
+      _url.path = _url.pathname = this._joinPath(_url.path, _path);
       return url.format(_url);
     },
-
+    _joinPath: function() {
+        return url.resolve.apply(url, arguments);
+    },
     // always returns an array
     // due to http.listen(3000, '10.0.0.1');
     listenUrl: function() {
