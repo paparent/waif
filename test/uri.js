@@ -39,4 +39,35 @@ describe('URI state machine', function() {
   });
 });
 
+describe('change states with input', function() {
+  var uri = null;
 
+  // wrap the object with a state machine
+  beforeEach(function() {
+    uri = {};
+    state(uri, smUri);
+  });
+
+  it('should handle ports', function() {
+    uri.set(3000);
+    uri.state().name.should.equal('Port');
+  });
+
+
+  it('should handle urls', function() {
+    uri.set('http://api.example.com/v2');
+    uri.state().name.should.equal('Url');
+  });
+
+
+  it('should handle filenames', function() {
+    uri.set('/tmp/example.sock');
+    uri.state().name.should.equal('File');
+  });
+
+
+  it('should consider no input a filename', function() {
+    uri.set();
+    uri.state().name.should.equal('File');
+  });
+});
