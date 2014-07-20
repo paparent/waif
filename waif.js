@@ -37,7 +37,7 @@ Waif.prototype.start = function() {
 };
 
 Waif.prototype.stop = function() {
-  debug('start');
+  debug('stop');
   //_(this._services).invoke('stop');
   return this;
 };
