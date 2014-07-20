@@ -31,14 +31,7 @@ Uri.prototype.initialize = function() {
         this.state().go('File');
       }
     }),
-    Url: state({
-      admit: { // format: 'http://api.example.com'
-        Initial: function() { return isUrl(this.owner.input); }
-      },
-      arrive: function() {
-        this.url = url.parse(this.input);
-      }
-    }),
+
     Port: state({
       admit: { // format: 3000
         Initial: function() { return _.isNumber(this.owner.input); }
@@ -47,19 +40,52 @@ Uri.prototype.initialize = function() {
         this.url = url.parse('http://127.0.0.1:' + this.input);
       }
     }),
+
+    Url: state({
+      admit: { // format: 'http://api.example.com'
+        Initial: function() { return isUrl(this.owner.input); }
+      },
+      arrive: function() {
+        this.url = url.parse(this.input + '/');
+      }
+    }),
+
     File: state({
       admit: { // format: '/filename.sock' or undefined
         Initial: function() { return true; }
       },
       arrive: function() {
-        this.url = this.input || temp.path();
-      } 
+        this.filename = this.input || temp.path();
+      },
+      get: function() {
+        return this.filename;
+      },
+      requestUrl: function(_path) {
+        return 'unix:/' + path.join(this.filename, _path || '');
+      },
+      listenUrl: function() {
+        return [this.filename];
+      }
     }),
 
     // default for all
     get: function() {
       return this.url;
     },
+
+    // append the request path.
+    requestUrl: function(_path) {
+      var _url = _.clone(this.url);
+      var _path = (_path || '').replace(/^\//, '');
+      _url.path = _url.pathname = url.resolve(_url.path, _path);
+      return url.format(_url);
+    },
+
+    // always returns an array
+    // due to http.listen(3000, '10.0.0.1');
+    listenUrl: function() {
+      return [url.port, url.hostname];
+    }
   });
 };
 

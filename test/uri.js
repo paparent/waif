@@ -73,3 +73,41 @@ describe('change states with input', function() {
   });
 
 });
+
+describe('request urls', function() {
+  var uri = null;
+
+  // wrap the object with a state machine
+  beforeEach(function() {
+    uri = new Uri();
+  });
+
+  it('sockets should give valid urls', function() {
+    uri.set();
+    var filename = uri.get();
+    var socket = 'unix:/' + filename;
+    uri.requestUrl().should.equal(socket);
+    uri.requestUrl('path').should.equal(socket + '/path');
+    uri.requestUrl('/path').should.equal(socket + '/path');
+  });
+
+  it('ports should give valid urls', function() {
+    uri.set(3000);
+    var portUrl = 'http://127.0.0.1:3000';
+
+    uri.requestUrl().should.equal(portUrl + '/');
+    uri.requestUrl('path').should.equal(portUrl + '/path');
+    uri.requestUrl('/path').should.equal(portUrl + '/path');
+  });
+
+
+  it('urls should give valid urls', function() {
+    var urlUrl = 'http://test.example.com:3200/api/test';
+    uri.set(urlUrl);
+
+    uri.requestUrl().should.equal(urlUrl + '/');
+    uri.requestUrl('path').should.equal(urlUrl + '/path');
+    uri.requestUrl('/path').should.equal(urlUrl + '/path');
+  });
+
+});
