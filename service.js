@@ -6,6 +6,7 @@ var norma        = require('norma');
 var debug        = require('debug')('waif:service');
 var temp         = require('temp').track();
 var isUrl        = require('is-url');
+var path         = require('path');
 var util         = require('util');
 var _            = require('lodash');
 
@@ -45,9 +46,9 @@ Service.createInstance = function(name) {
   };
 
   fn.instance = _service;
+
   var proxyMethods = [
-    'request', 'forward', 'listen', 'use',
-    'start', 'stop', 'on', 'config'
+    'request', 'forward', 'listen', 'use', 'start', 'stop', 'on', 'config'
   ];
 
   _(proxyMethods).each(function(method) {
@@ -70,7 +71,7 @@ Service.prototype.request = function() {
   var proto = (this.connType === 'socket') ? 'unix:/' : 'http://';
   var host = (this.connType === 'port') ? '127.0.0.1:' : '';
 
-  args[0] = proto + host + this.url + args[0];
+  args[0] = proto + host + path.join(this.url, args[0]);
 
   debug('request on service: %s, %o', this.name, args);
   return request.apply(request, args);
