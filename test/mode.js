@@ -1,6 +1,6 @@
 /* global describe, it, before, beforeEach, after, afterEach */
 var should = require('should');
-var Mode = require('../connection/mode');
+var Mode = require('../state/mode');
 
 describe('Connection mode state macine', function() {
   var mode = null;

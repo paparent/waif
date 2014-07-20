@@ -1,8 +1,8 @@
 /* global describe, it, before, beforeEach, after, afterEach */
 var should = require('should');
-var Status = require('../connection/status');
+var Status = require('../state/status');
 
-describe('Connection status state macine', function() {
+describe('Connection status state machine', function() {
   var status = null;
 
   before(function() {
