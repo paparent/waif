@@ -37,7 +37,7 @@ Uri.prototype.initialize = function() {
         Initial: function() { return _.isNumber(this.owner.input); }
       },
       arrive: function() {
-        this.url = url.parse('http://127.0.0.1:' + this.input);
+        this.url = url.parse('http://0.0.0.0:' + this.input);
       }
     }),
 
@@ -84,7 +84,9 @@ Uri.prototype.initialize = function() {
     // always returns an array
     // due to http.listen(3000, '10.0.0.1');
     listenUrl: function() {
-      return [url.port, url.hostname];
+      var results = [parseInt(this.url.port, 10)];
+      this.url.hostname && results.push(this.url.hostname);
+      return results;
     }
   });
 };

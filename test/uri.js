@@ -93,7 +93,7 @@ describe('request urls', function() {
 
   it('ports should give valid urls', function() {
     uri.set(3000);
-    var portUrl = 'http://127.0.0.1:3000';
+    var portUrl = 'http://0.0.0.0:3000';
 
     uri.requestUrl().should.equal(portUrl + '/');
     uri.requestUrl('path').should.equal(portUrl + '/path');
@@ -109,5 +109,35 @@ describe('request urls', function() {
     uri.requestUrl('path').should.equal(urlUrl + '/path');
     uri.requestUrl('/path').should.equal(urlUrl + '/path');
   });
+});
+
+describe('listen urls', function() {
+  var uri = null;
+
+  // wrap the object with a state machine
+  beforeEach(function() {
+    uri = new Uri();
+  });
+
+  it('sockets should give valid urls', function() {
+    uri.set();
+    var filename = uri.get();
+    uri.listenUrl()[0].should.equal(filename);
+  });
+
+  it('ports should give valid urls', function() {
+    uri.set(3000);
+    uri.listenUrl()[0].should.equal(3000);
+    uri.listenUrl()[1].should.equal("0.0.0.0");
+  });
+
+
+  it('urls should give valid urls', function() {
+    var urlUrl = 'http://test.example.com:3200/api/test';
+    uri.set(urlUrl);
+    uri.listenUrl()[0].should.equal(3200);
+    uri.listenUrl()[1].should.equal('test.example.com');
+  });
+
 
 });
