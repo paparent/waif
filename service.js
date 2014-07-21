@@ -35,17 +35,3 @@ Service.createInstance = function(name) {
 };
 
 module.exports = Service;
-
-
-
-// stops listening on ports/sockets
-// emits a stop event
-Service.prototype.stop = function() {
-  debug('stop on service: %s', this.name);
-  this.emit('stop');
-  this.running = false;
-  if (this.type === 'listen') {
-    this.app && this.app.close();
-  }
-  return this;
-};
