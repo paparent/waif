@@ -101,7 +101,7 @@ Service.prototype.initialize = function() {
       return this;
     },
     request: function() {
-      var args = norma('s, .*', arguments);
+      var args = norma('s?, o?, .*', arguments);
 
       args[0] = {
         uri: this.uri.requestUrl(args[0]),
