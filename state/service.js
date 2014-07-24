@@ -6,14 +6,15 @@ var debug        = require('debug')('waif:state:service');
 var EventEmitter = require('events').EventEmitter;
 var request      = require('request');
 var norma        = require('norma');
-var state = require('state');
-var assert = require('assert');
+var state        = require('state');
+var assert       = require('assert');
 var express      = require('express');
 var util         = require('util');
-
 var _            = require('lodash');
+
 var Uri          = require('./uri');
 var Status       = require('./status');
+
 /**
 * Service constructor.
 *
@@ -25,10 +26,10 @@ function Service(name) {
   debug('new service: %s', name);
   assert(name, "service not supplied with name");
 
-  this.name                       = name;
-  this.middleware                 = [];
-  this.uri                        = new Uri();
-  this.status                     = new Status();
+  this.name       = name;
+  this.middleware = [];
+  this.uri        = new Uri();
+  this.status     = new Status();
 
   this.initialize();
 
@@ -44,12 +45,12 @@ Service.prototype.initialize = function() {
     }),
     Forwarding: state({
       start: function() {
-        debug('%s: start forwarding to %s', this.name, this.uri.get());
+        debug('%s: start forwarding to %s', this.name, this.uri.get().href);
         this.emit('start');
         this.status.state().go('start');
       },
       stop: function() {
-        debug('%s: stop forwarding to %s', this.name, this.uri.get());
+        debug('%s: stop forwarding to %s', this.name, this.uri.get().href);
         this.emit('stop');
         this.status.state().go('start');
       } 
@@ -101,15 +102,22 @@ Service.prototype.initialize = function() {
       return this;
     },
     request: function() {
-      var args = norma('s?, o?, .*', arguments);
+      var args = norma('uri:s?, qs:o?, callback:f?', arguments);
+      var requestArgs = [];
 
-      args[0] = {
-        uri: this.uri.requestUrl(args[0]),
+      requestArgs[0] = {
+        uri: this.uri.requestUrl(args.uri),
         json: true
       };
 
-      debug('request on service: %s, %o', this.name, args);
-      return request.apply(request, args);
+      if (args.qs) {
+        requestArgs[0].qs = args.qs;
+      }
+
+      requestArgs[1] = args.callback;
+      console.log(requestArgs);
+      debug('request on service: %s, %o', this.name, requestArgs);
+      return request.apply(request, requestArgs);
     },
 
     use: function() {
